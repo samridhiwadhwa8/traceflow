@@ -1,0 +1,12 @@
+{
+  "name": "traceflow-demo-app",
+  "version": "1.0.0",
+  "description": "Demo application monitored by TraceFlow",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
