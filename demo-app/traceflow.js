@@ -14,6 +14,7 @@ function traceflow(req, res, next) {
 
       const trace = {
         traceId,
+        timestamp: new Date().toISOString(),
         method: req.method,
         route: req.originalUrl,
         status: res.statusCode,
