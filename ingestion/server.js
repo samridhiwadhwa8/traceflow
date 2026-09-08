@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const Trace = require('./models/Trace');
@@ -8,8 +9,9 @@ const PORT = 4000;
 app.use(express.json());
 
 // MongoDB connection
-mongoose.connect('mongodb://localhost:27017/traceflow')
-  .then(() => console.log('Connected to MongoDB'))
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://<username>:<password>@<cluster>.mongodb.net/traceflow';
+mongoose.connect(MONGODB_URI)
+  .then(() => console.log('Connected to MongoDB Atlas'))
   .catch(err => console.error('MongoDB connection error:', err));
 
 // Ingest endpoint
@@ -28,6 +30,10 @@ app.post('/ingest', async (req, res) => {
   }
 });
 
+app.get("/traces",async(req,res)=>{
+  const traces=await Trace.find();
+  res.json(traces);
+})
 // Health check
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });

@@ -14,22 +14,22 @@ const traceSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  path: {
+  route: {
     type: String,
     required: true
   },
-  statusCode: {
+  status: {
     type: Number,
     required: true
   },
   duration: {
     type: Number,
     required: true
-  },
-  userAgent: String,
-  ip: String
+  }
 }, {
   timestamps: true
 });
-
+traceSchema.index({ traceId: 1 });
+traceSchema.index({ route: 1 });
+traceSchema.index({ timestamp: -1 });
 module.exports = mongoose.model('Trace', traceSchema);
