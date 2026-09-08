@@ -31,7 +31,7 @@ app.get('/api/slow', (req, res) => {
 app.post('/checkout', (req, res) => {
   setTimeout(() => {
     res.json({ message: 'Checkout successful' });
-  }, 500);
+  }, 1500);
 });
 
 app.listen(PORT, () => {
