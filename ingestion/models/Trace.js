@@ -3,8 +3,7 @@ const mongoose = require('mongoose');
 const traceSchema = new mongoose.Schema({
   traceId: {
     type: String,
-    required: true,
-    index: true
+    required: true
   },
   timestamp: {
     type: Date,

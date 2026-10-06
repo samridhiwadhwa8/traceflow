@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>TraceFlow Live Dashboard</title>
+</head>
+
+<body>
+
+<h1>TraceFlow Live Dashboard</h1>
+
+<div id="status">Connecting...</div>
+
+<h2>Live Traces</h2>
+
+<div id="traces"></div>
+
+<script>
+
+const socket = new WebSocket("ws://localhost:8080");
+
+const status = document.getElementById("status");
+const traces = document.getElementById("traces");
+
+socket.onopen = () => {
+    status.innerText = "🟢 Connected";
+};
+
+socket.onmessage = (event) => {
+
+    const data = JSON.parse(event.data);
+
+    console.log("Received:", data);
+
+    if (data.type === "new_trace") {
+
+        const traceDiv = document.createElement("div");
+
+        traceDiv.innerHTML = `
+            <hr>
+            <p><strong>Trace:</strong> ${data.trace.traceId}</p>
+            <p><strong>Spans:</strong> ${data.spans.length}</p>
+        `;
+
+        traces.prepend(traceDiv);
+    }
+};
+
+socket.onclose = () => {
+    status.innerText = "🔴 Disconnected";
+};
+
+</script>
+
+</body>
+
+</html>
