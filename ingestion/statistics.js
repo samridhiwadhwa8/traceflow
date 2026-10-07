@@ -3,6 +3,8 @@
  * Calculates various statistical metrics on latency data
  */
 
+const Span = require('./models/Span');
+
 /**
  * Calculate the mean (average) of an array of values
  * @param {number[]} values - Array of numeric values
@@ -112,11 +114,66 @@ function calculateStatistics(values) {
     };
 }
 
+/**
+ * Group spans by operation and extract durationMs
+ * @param {Array} spans - Array of span objects
+ * @returns {Object} Object with operations as keys and duration arrays as values
+ */
+function groupByOperation(spans) {
+    const grouped = {};
+
+    for (const span of spans) {
+        const operation = span.operation;
+
+        if (!grouped[operation]) {
+            grouped[operation] = [];
+        }
+
+        grouped[operation].push(span.durationMs);
+    }
+
+    return grouped;
+}
+
+/**
+ * Get span statistics from MongoDB for a time range
+ * @param {Date} startTime - Start of time range
+ * @param {Date} endTime - End of time range
+ * @returns {Promise<Object>} Statistics grouped by operation
+ */
+async function getSpanStatistics(startTime, endTime) {
+    try {
+        // Query spans within time range
+        const spans = await Span.find({
+            startTime: {
+                $gte: startTime,
+                $lte: endTime
+            }
+        }).select('operation durationMs');
+
+        // Group by operation
+        const grouped = groupByOperation(spans);
+
+        // Calculate statistics for each operation
+        const statistics = {};
+        for (const [operation, durations] of Object.entries(grouped)) {
+            statistics[operation] = calculateStatistics(durations);
+        }
+
+        return statistics;
+    } catch (error) {
+        console.error('Error calculating span statistics:', error);
+        throw error;
+    }
+}
+
 module.exports = {
     mean,
     standardDeviation,
     percentile,
     ewma,
     iqr,
-    calculateStatistics
+    calculateStatistics,
+    groupByOperation,
+    getSpanStatistics
 };
