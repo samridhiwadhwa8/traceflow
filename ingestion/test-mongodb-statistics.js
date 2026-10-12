@@ -30,6 +30,14 @@ async function testMongoDBStatistics() {
             }
         });
         console.log(`Spans in time range: ${spansInRange}`);
+         const result = await Span.find({
+            startTime: {
+                      $gte: startTime,
+                        $lte: endTime
+            }
+        }).explain("executionStats");
+        console.log('\nMongoDB Query Plan:');
+        console.log(JSON.stringify(result, null, 2));
 
         const statistics = await getSpanStatistics(startTime, endTime);
 
