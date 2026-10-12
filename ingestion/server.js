@@ -5,6 +5,7 @@ const { createClient } = require('redis');
 const Trace = require('./models/Trace');
 const Span = require('./models/Span');
 const websocket = require('./websocket');
+const { buildSpanTree } = require('./spanTree');
 
 const app = express();
 const PORT = 4000;
@@ -66,7 +67,7 @@ app.get('/health', (req, res) => {
 });
 
 // Get all traces (for debugging)
-app.get('/traces', async (req, res) => {
+app.get('/api/v1/traces', async (req, res) => {
   try {
     const traces = await Trace.find().sort({ createdAt: -1 }).limit(100);
     res.json(traces);
@@ -76,7 +77,7 @@ app.get('/traces', async (req, res) => {
 });
 
 // Get single trace by ID with Redis caching
-app.get('/traces/:traceId', async (req, res) => {
+app.get('/api/v1/traces/:traceId', async (req, res) => {
   const traceId = req.params.traceId;
   const cacheKey = `trace:${traceId}`;
 
@@ -110,6 +111,37 @@ app.get('/traces/:traceId', async (req, res) => {
   } catch (error) {
     console.error('Error fetching trace:', error);
     res.status(500).json({ error: 'Failed to fetch trace' });
+  }
+});
+
+// Get span tree for a trace
+app.get('/api/v1/traces/:traceId/tree', async (req, res) => {
+  try {
+    const { traceId } = req.params;
+
+    const spans = await Span.find({ traceId })
+      .sort({ startTime: 1 })
+      .lean();
+
+    if (spans.length === 0) {
+      return res.status(404).json({
+        error: 'No spans found for this trace'
+      });
+    }
+
+    const roots = buildSpanTree(spans);
+
+    res.json({
+      traceId,
+      spanCount: spans.length,
+      roots
+    });
+  } catch (error) {
+    console.error('Error building span tree:', error);
+
+    res.status(500).json({
+      error: 'Failed to build span tree'
+    });
   }
 });
 

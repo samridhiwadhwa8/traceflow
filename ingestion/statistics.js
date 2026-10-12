@@ -150,6 +150,14 @@ async function getSpanStatistics(startTime, endTime) {
                 $lte: endTime
             }
         }).select('operation durationMs');
+        const result = await Span.find({
+    startTime: {
+              $gte: startTime,
+                $lte: endTime
+    }
+}).explain("executionStats");
+
+console.log(JSON.stringify(result, null, 2));
 
         // Group by operation
         const grouped = groupByOperation(spans);
