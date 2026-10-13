@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const { createClient } = require('redis');
+const cors = require('cors');
 const Trace = require('./models/Trace');
 const Span = require('./models/Span');
 const websocket = require('./websocket');
@@ -10,6 +11,7 @@ const { buildSpanTree } = require('./spanTree');
 const app = express();
 const PORT = 4000;
 
+app.use(cors());
 app.use(express.json());
 
 // MongoDB connection
