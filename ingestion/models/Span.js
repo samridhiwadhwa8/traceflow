@@ -25,11 +25,16 @@ const spanSchema = new mongoose.Schema({
   startTime: {
     type: Date,
     required: true
+  },
+  endTime: {
+    type: Date,
+    required: true
   }
 }, {
   timestamps: true
 });
 
 spanSchema.index({ traceId: 1 });
+spanSchema.index({ startTime: 1});
 
 module.exports = mongoose.model('Span', spanSchema);
