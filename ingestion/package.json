@@ -4,7 +4,8 @@
   "description": "TraceFlow ingestion server for receiving telemetry",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node --test test-diagnostics.test.js"
   },
   "dependencies": {
     "cors": "^2.8.6",

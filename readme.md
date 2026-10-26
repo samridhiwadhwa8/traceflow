@@ -40,6 +40,7 @@ INGESTION SERVER (localhost:4000)
 - **Span Tree Reconstruction**: Rebuilds hierarchical parent-child relationships from flat span data
 - **Waterfall Visualization**: Timeline-based view showing operation execution order and overlaps
 - **Statistical Analysis**: Calculates mean, standard deviation, percentiles (p50, p95, p99), EWMA, and IQR
+- **Evidence-based Trace Diagnosis**: Compares traces with similar route and span structure, flags latency outliers, and ranks unusually slow leaf spans
 - **Live Updates**: WebSocket integration for real-time dashboard updates
 - **Caching**: Redis integration for improved query performance
 
@@ -48,6 +49,7 @@ INGESTION SERVER (localhost:4000)
 - `GET /health` - Health check
 - `GET /api/v1/traces` - List all traces
 - `GET /api/v1/traces/:traceId` - Get specific trace (with Redis caching)
+- `GET /api/v1/traces/:traceId/diagnosis` - Compare a trace against recent, structurally similar healthy traces
 - `GET /api/v1/traces/:traceId/tree` - Get hierarchical span tree for waterfall visualization
 
 ## Project Structure
@@ -85,8 +87,7 @@ TraceFlow/
 ### Prerequisites
 - Node.js
 - MongoDB (running on localhost:27017 or MongoDB Atlas)
-- Redis (running on localhost:6379) - optional but recommended
-- Docker (for Redis)
+- Redis (optional; caching is skipped if unavailable)
 
 ### Installation
 
@@ -108,14 +109,34 @@ cd waterfall-dashboard
 npm install
 ```
 
-4. Start Redis with Docker:
+4. Copy `ingestion/.env.example` to `ingestion/.env` and set `MONGODB_URI` to your local MongoDB URL or Atlas connection string. Keep `.env` files private; do not commit credentials.
+
+5. Optionally start Redis with Docker:
 ```bash
 docker run -d -p 6379:6379 --name traceflow-redis redis
 ```
 
 ## Running
 
-### Start Redis (if not running)
+### Run the complete local stack with Docker Compose
+
+From the repository root, start MongoDB, Redis, the ingestion API, the demo app and dashboard:
+
+```bash
+docker compose up --build
+```
+
+Open the dashboard at `http://localhost:5173`. Generate traffic from another terminal:
+
+```bash
+curl http://localhost:3000/api/users
+curl http://localhost:3000/api/slow
+curl -X POST http://localhost:3000/checkout
+```
+
+Stop the services with `Ctrl+C`; remove the containers with `docker compose down`. MongoDB data is kept in the `traceflow-mongo-data` volume. This Compose setup is for local development, not production deployment.
+
+### Start Redis (optional)
 ```bash
 docker start traceflow-redis
 ```
@@ -142,6 +163,14 @@ npm run dev
 ```
 
 ## Testing
+
+Run the deterministic anomaly-diagnosis tests:
+```bash
+cd ingestion
+npm test
+```
+
+The first five comparable successful traces establish a baseline. Diagnosis uses a statistical latency threshold and ranks leaf spans by their measured increase over the operation's historical median. This is a transparent heuristic, not machine learning, and a ranked span is a lead rather than proof of the underlying cause.
 
 ### Generate Traces via Postman/curl
 ```bash
