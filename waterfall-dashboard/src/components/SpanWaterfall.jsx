@@ -17,6 +17,11 @@ export default function SpanWaterfall() {
   const [traces, setTraces] = useState([]);
   const [traceId, setTraceId] = useState("");
   const [tree, setTree] = useState([]);
+  const [diagnosisState, setDiagnosisState] = useState({
+    traceId: "",
+    result: null,
+    error: "",
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [wsConnected, setWsConnected] = useState(false);
@@ -46,6 +51,45 @@ export default function SpanWaterfall() {
     }
 
     loadTraces();
+  }, [traceId]);
+
+  useEffect(() => {
+    if (!traceId) {
+      return;
+    }
+
+    let cancelled = false;
+
+    async function loadDiagnosis() {
+      try {
+        const response = await fetch(
+          `${API_URL}/api/v1/traces/${encodeURIComponent(traceId)}/diagnosis`
+        );
+
+        if (!response.ok) {
+          throw new Error("Could not analyze this trace");
+        }
+
+        const result = await response.json();
+        if (!cancelled) {
+          setDiagnosisState({ traceId, result, error: "" });
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setDiagnosisState({
+            traceId,
+            result: null,
+            error: err.message,
+          });
+        }
+      }
+    }
+
+    loadDiagnosis();
+
+    return () => {
+      cancelled = true;
+    };
   }, [traceId]);
 
   // WebSocket connection for live updates
@@ -100,7 +144,6 @@ export default function SpanWaterfall() {
   // Load the selected trace's nested span tree.
   useEffect(() => {
     if (!traceId) {
-      setTree([]);
       return;
     }
 
@@ -158,6 +201,12 @@ export default function SpanWaterfall() {
   };
 
   const { startTime: timelineStart, totalDuration } = calculateTimeline();
+  const diagnosis = diagnosisState.traceId === traceId
+    ? diagnosisState.result
+    : null;
+  const diagnosisError = diagnosisState.traceId === traceId
+    ? diagnosisState.error
+    : "";
 
   return (
     <main className="waterfall-page">
@@ -201,6 +250,45 @@ export default function SpanWaterfall() {
 
       {loading && <p>Loading span tree...</p>}
 
+      {diagnosisError && <p className="waterfall-error">{diagnosisError}</p>}
+
+      {diagnosis && (
+        <section className={`diagnosis-panel diagnosis-${diagnosis.state}`}>
+          <div className="diagnosis-heading">
+            <h2>Trace diagnosis</h2>
+            <span>{diagnosis.state.replace("_", " ")}</span>
+          </div>
+          <p>{diagnosis.message}</p>
+          {diagnosis.baseline && (
+            <p className="diagnosis-baseline">
+              Compared with {diagnosis.sampleCount} similar healthy traces:
+              median {Math.round(diagnosis.baseline.medianMs)} ms,
+              p95 {Math.round(diagnosis.baseline.p95Ms)} ms.
+            </p>
+          )}
+          {diagnosis.rankedSpans.length > 0 && (
+            <>
+              <h3>Likely contributors (ranked)</h3>
+              <ol>
+                {diagnosis.rankedSpans.map((span) => (
+                  <li key={span.spanId}>
+                    <strong>{span.operation}</strong>
+                    {" — "}
+                    {span.reason}
+                    {span.slowdownFactor && (
+                      <span> ({span.slowdownFactor}× its baseline)</span>
+                    )}
+                  </li>
+                ))}
+              </ol>
+              <p className="diagnosis-disclaimer">
+                Rankings show timing evidence; they do not prove the underlying cause.
+              </p>
+            </>
+          )}
+        </section>
+      )}
+
       {!loading && !error && tree.length === 0 && (
         <p>No spans found. Generate a request in your demo application.</p>
       )}
@@ -214,7 +302,6 @@ export default function SpanWaterfall() {
 
           {tree.map((span) => {
             const spanStartTime = new Date(span.startTime).getTime();
-            const spanEndTime = new Date(span.endTime || span.startTime).getTime();
             const duration = Number(span.durationMs) || 0;
 
             // Calculate position and width based on actual timeline

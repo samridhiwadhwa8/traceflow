@@ -7,22 +7,23 @@ const Trace = require('./models/Trace');
 const Span = require('./models/Span');
 const websocket = require('./websocket');
 const { buildSpanTree } = require('./spanTree');
+const { analyzeTrace, normalizeRoute } = require('./diagnostics');
 
 const app = express();
-const PORT = 4000;
+const PORT = Number(process.env.INGESTION_PORT) || 4000;
 
 app.use(cors());
 app.use(express.json());
 
 // MongoDB connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://<username>:<password>@<cluster>.mongodb.net/traceflow';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/traceflow';
 mongoose.connect(MONGODB_URI)
-  .then(() => console.log('Connected to MongoDB Atlas'))
+  .then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
 
 // Redis connection (optional - will work without Redis)
 const redis = createClient({
-  url: 'redis://localhost:6379'
+  url: process.env.REDIS_URL || 'redis://127.0.0.1:6379'
 });
 
 redis.on('error', err => console.error('Redis Error:', err));
@@ -35,7 +36,18 @@ redis.connect()
 // Ingest endpoint
 app.post('/ingest', async (req, res) => {
   try {
-    const { trace, spans } = req.body;
+    const { trace, spans = [] } = req.body || {};
+
+    if (
+      !trace ||
+      typeof trace.traceId !== 'string' ||
+      !Array.isArray(spans) ||
+      spans.some((span) => !span || span.traceId !== trace.traceId)
+    ) {
+      return res.status(400).json({
+        error: 'A trace and an array of spans belonging to that trace are required'
+      });
+    }
     
     // Save trace
     const traceDoc = new Trace(trace);
@@ -65,7 +77,16 @@ app.post('/ingest', async (req, res) => {
 
 // Health check
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
+  const mongoReady = mongoose.connection.readyState === 1;
+  const status = mongoReady ? 'ok' : 'unavailable';
+
+  res.status(mongoReady ? 200 : 503).json({
+    status,
+    services: {
+      mongodb: mongoReady ? 'connected' : 'unavailable',
+      redis: redis.isReady ? 'connected' : 'unavailable (optional)'
+    }
+  });
 });
 
 // Get all traces (for debugging)
@@ -84,35 +105,68 @@ app.get('/api/v1/traces/:traceId', async (req, res) => {
   const cacheKey = `trace:${traceId}`;
 
   try {
-    // 1. Check Redis
-    const cached = await redis.get(cacheKey);
+    const cached = redis.isReady ? await redis.get(cacheKey).catch((error) => {
+      console.warn('Redis read failed; falling back to MongoDB:', error.message);
+      return null;
+    }) : null;
 
     if (cached) {
-      console.log('CACHE HIT');
       return res.json(JSON.parse(cached));
     }
 
-    console.log('CACHE MISS');
-
-    // 2. Query MongoDB
     const trace = await Trace.findOne({ traceId });
 
     if (!trace) {
       return res.status(404).json({ error: 'Trace not found' });
     }
 
-    // 3. Store in Redis with 60 second TTL
-    await redis.set(
-      cacheKey,
-      JSON.stringify(trace),
-      { EX: 60 }
-    );
-
-    // 4. Return result
+    if (redis.isReady) {
+      await redis.set(cacheKey, JSON.stringify(trace), { EX: 60 }).catch((error) => {
+        console.warn('Redis cache write failed:', error.message);
+      });
+    }
     res.json(trace);
   } catch (error) {
     console.error('Error fetching trace:', error);
     res.status(500).json({ error: 'Failed to fetch trace' });
+  }
+});
+
+app.get('/api/v1/traces/:traceId/diagnosis', async (req, res) => {
+  try {
+    const { traceId } = req.params;
+    const trace = await Trace.findOne({ traceId }).lean();
+
+    if (!trace) {
+      return res.status(404).json({ error: 'Trace not found' });
+    }
+
+    const spans = await Span.find({ traceId }).lean();
+    const routePattern = new RegExp(
+      `^${normalizeRoute(trace.route).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?:\\?.*)?$`
+    );
+    const baselineTraces = await Trace.find({
+      traceId: { $ne: traceId },
+      status: { $lt: 500 },
+      route: routePattern
+    })
+      .sort({ timestamp: -1 })
+      .limit(200)
+      .lean();
+    const baselineTraceIds = baselineTraces.map((item) => item.traceId);
+    const baselineSpans = baselineTraceIds.length
+      ? await Span.find({ traceId: { $in: baselineTraceIds } }).lean()
+      : [];
+
+    res.json(analyzeTrace({
+      trace,
+      spans,
+      baselineTraces,
+      baselineSpans
+    }));
+  } catch (error) {
+    console.error('Error analyzing trace:', error);
+    res.status(500).json({ error: 'Failed to analyze trace' });
   }
 });
 
