@@ -8,96 +8,89 @@ The diagram below describes the **target architecture** for the full TraceFlow p
 
 An expanded architecture document with the component inventory is available at [architecture-diagram.md](./.github/modernize/assessment/engines/facts/architecture-diagram.md).
 
+### Telemetry ingestion and storage
+
 <!-- mermaid-checked: no \n, no em-dash/en-dash, no {} in labels, subgraphs are id["label"], arrows are -->|"label"|, all subgraphs closed by end, ids unique -->
 ```mermaid
 flowchart TD
-    subgraph ClientLayer["Developer and Browser"]
-        Developer["Developer application"]
-        Browser["Dashboard user"]
+    subgraph IngestClient["Application"]
+        DeveloperApp["Developer application"]
+        TraceSdk["TraceFlow Node.js SDK"]
+        OTelInput["OpenTelemetry input planned"]
     end
 
-    subgraph InstrumentationLayer["Instrumentation"]
-        App["Instrumented Node.js service"]
-        SDK["TraceFlow Node.js SDK"]
-        OTel["OpenTelemetry input - planned"]
+    subgraph IngestBackend["Ingestion"]
+        IngestApi["Ingestion API"]
+        TraceStore["MongoDB trace and span storage"]
+        LiveEvents["WebSocket live events"]
     end
 
-    subgraph BackendLayer["TraceFlow backend"]
-        Ingest["Ingestion API"]
-        Guard["Authentication, API keys and validation - planned"]
-        Process["Trace processing"]
-        Diagnosis["Statistical trace diagnosis"]
-        REST["Versioned REST API with search and pagination"]
-        Live["WebSocket live events"]
-        Retention["Sampling and retention - planned"]
-        Queue["Queue and workers - future"]
+    DeveloperApp -->|"creates request spans"| TraceSdk
+    TraceSdk -->|"POST trace and spans"| IngestApi
+    IngestApi -->|"202 accepted response"| TraceSdk
+    OTelInput -.->|"OTLP receiver planned"| IngestApi
+    IngestApi -->|"validates and stores"| TraceStore
+    IngestApi -->|"publishes new trace event"| LiveEvents
+```
+
+### Trace exploration and diagnosis
+
+<!-- mermaid-checked: no \n, no em-dash/en-dash, no {} in labels, subgraphs are id["label"], arrows are -->|"label"|, all subgraphs closed by end, ids unique -->
+```mermaid
+flowchart TD
+    subgraph TraceUi["Dashboard"]
+        DashboardUser["Dashboard user"]
+        ReactDashboard["React trace explorer"]
+        Waterfall["Waterfall and diagnosis panel"]
+        MetricViews["Metrics and service map planned"]
     end
 
-    subgraph StorageLayer["Storage"]
-        Mongo[("MongoDB traces and spans")]
-        Redis[("Redis cache")]
+    subgraph TraceApi["Query and analysis"]
+        RestApi["Trace REST API"]
+        SpanTree["Span tree builder"]
+        DiagnosisEngine["Statistical diagnosis"]
+        TraceCache[("Redis optional cache")]
+        TraceDatabase[("MongoDB")]
+        SocketFeed["WebSocket live events"]
     end
 
-    subgraph PresentationLayer["Dashboard"]
-        UI["React trace explorer and waterfall"]
-        Metrics["Latency, error, SLO and service map views - planned"]
-    end
+    DashboardUser -->|"opens"| ReactDashboard
+    ReactDashboard -->|"selects a trace"| Waterfall
+    Waterfall -->|"requests trace and diagnosis"| RestApi
+    RestApi -->|"reads trace data"| TraceDatabase
+    RestApi -->|"optional cache lookup"| TraceCache
+    RestApi -->|"builds span hierarchy"| SpanTree
+    RestApi -->|"compares similar traces"| DiagnosisEngine
+    DiagnosisEngine -->|"loads baseline spans"| TraceDatabase
+    RestApi -->|"returns JSON response"| Waterfall
+    SocketFeed -->|"pushes new trace notification"| ReactDashboard
+    DiagnosisEngine -.->|"future aggregates"| MetricViews
+```
 
-    subgraph OperationsLayer["Operations"]
-        Compose["Docker Compose local development"]
-        CI["CI, tests and dependency scanning - planned"]
-        Cloud["Cloud deployment - planned"]
-    end
+### Local and future deployment
 
-    Developer -->|"runs requests"| App
-    App -->|"instrumented by"| SDK
-    SDK -->|"POST trace and spans"| Ingest
-    OTel -.->|"OTLP receiver - planned"| Ingest
-    Ingest -->|"authenticate and validate - planned"| Guard
-    Guard -->|"accepted telemetry"| Process
-    Ingest -->|"202 accepted response"| SDK
-    Process -->|"store trace and spans"| Mongo
-    Process -->|"compare matching route and span structure"| Diagnosis
-    Diagnosis -->|"load baseline and span records"| Mongo
-    Diagnosis -->|"diagnosis JSON"| REST
-    REST -->|"analyze selected trace"| Diagnosis
-    Process -.->|"apply sampling and retention - planned"| Retention
-    Retention -.->|"expire old trace data - planned"| Mongo
-    Process -->|"publish new trace event"| Live
-    Process -.->|"enqueue when scale requires it"| Queue
-    Queue -.->|"process asynchronously - future"| Process
+<!-- mermaid-checked: no \n, no em-dash/en-dash, no {} in labels, subgraphs are id["label"], arrows are -->|"label"|, all subgraphs closed by end, ids unique -->
+```mermaid
+flowchart TD
+    LocalCompose["Docker Compose on developer laptop"]
+    LocalContainers["Local app, API and dashboard containers"]
+    LocalDatabase["Local MongoDB and Redis containers"]
+    CloudHost["Cloud container host planned"]
+    PublicApp["Public TraceFlow application planned"]
+    CloudData["Managed or hosted cloud data services planned"]
 
-    Browser -->|"opens dashboard"| UI
-    UI -->|"request traces, spans and diagnosis"| REST
-    REST -->|"read and query"| Mongo
-    REST -->|"cache lookup and response"| Redis
-    Mongo -->|"trace and span records"| REST
-    Redis -->|"cached trace when available"| REST
-    REST -->|"JSON API response"| UI
-    UI -->|"render waterfall and diagnosis"| Browser
-    Live -->|"push new trace event"| UI
-    Process -->|"latency and error aggregates - planned"| Metrics
-    Metrics -->|"show service health - planned"| UI
-
-    Compose -.->|"starts local services"| App
-    Compose -.->|"starts local services"| Ingest
-    Compose -.->|"starts local services"| Mongo
-    Compose -.->|"starts local services"| Redis
-    Compose -.->|"starts local services"| UI
-    CI -.->|"checks code and images - planned"| Ingest
-    CI -.->|"checks dashboard - planned"| UI
-    Cloud -.->|"hosts production services - planned"| App
-    Cloud -.->|"hosts production services - planned"| Ingest
-    Cloud -.->|"hosts production services - planned"| Mongo
-    Cloud -.->|"hosts production services - planned"| UI
+    LocalCompose -->|"starts"| LocalContainers
+    LocalCompose -->|"starts"| LocalDatabase
+    CloudHost -.->|"runs after deployment setup"| PublicApp
+    CloudHost -.->|"connects to"| CloudData
 ```
 
 ### Request and response flow
 
 1. An application handles a request; the TraceFlow SDK records the request and its spans.
 2. The SDK sends trace data to `POST /ingest`. The API validates the payload, stores it, and returns an HTTP response to the SDK.
-3. Trace processing builds the span tree and computes the statistical diagnosis from comparable stored traces. This diagnosis is evidence-based and does not require machine learning.
-4. The dashboard requests trace details and diagnosis through the REST API. The API reads from MongoDB and may use Redis as a cache, then returns JSON to the browser.
+3. The dashboard requests trace details and diagnosis through the REST API. The API reads from MongoDB and may use Redis as a cache, then returns JSON to the browser.
+4. The diagnosis API compares the selected trace with similar stored traces, builds the span tree, and returns evidence-based statistical results.
 5. When ingestion completes, the backend sends a WebSocket event to connected dashboards so they can refresh the trace list.
 6. In the future, authentication, OpenTelemetry ingestion, metrics/service maps, and a queue can be added without making a queue part of the initial local architecture.
 
