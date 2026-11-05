@@ -62,6 +62,7 @@ async function withSpan(operation, work) {
 
 function traceflow(req, res, next) {
   const traceId = crypto.randomUUID();
+  res.setHeader("x-trace-id", traceId);
   const requestStartClock = performance.now();
   const requestStartTime = new Date();
   const rootSpanId = crypto.randomUUID();
@@ -104,6 +105,7 @@ function traceflow(req, res, next) {
         route: req.route && typeof req.route.path === "string"
           ? `${req.baseUrl}${req.route.path}`
           : req.path,
+        faultType: String(req.query.fault || "normal"),
         status: res.statusCode,
         duration: Math.round(
           requestEndClock - requestStartClock
