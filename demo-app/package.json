@@ -4,7 +4,8 @@
   "description": "Demo application monitored by TraceFlow",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "evaluate": "node ../ingestion/evaluation/run-evaluation.js"
   },
   "dependencies": {
     "express": "^4.18.2"

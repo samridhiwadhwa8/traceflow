@@ -1,0 +1,8 @@
+[
+  { "faultType": "normal", "expectedAnomaly": false, "expectedRootCause": null, "repetitions": 10 },
+  { "faultType": "slow_payment", "expectedAnomaly": true, "expectedRootCause": "process_payment", "repetitions": 10 },
+  { "faultType": "slow_inventory", "expectedAnomaly": true, "expectedRootCause": "update_inventory", "repetitions": 10 },
+  { "faultType": "slow_confirmation", "expectedAnomaly": true, "expectedRootCause": "send_confirmation", "repetitions": 10 },
+  { "faultType": "payment_500", "expectedAnomaly": true, "expectedRootCause": "process_payment", "repetitions": 10 },
+  { "faultType": "inventory_500", "expectedAnomaly": true, "expectedRootCause": "update_inventory", "repetitions": 10 }
+]

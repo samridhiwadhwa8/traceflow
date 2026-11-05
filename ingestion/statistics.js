@@ -1,12 +1,6 @@
-/**
- * Statistics module for TraceFlow
- * Calculates various statistical metrics on latency data
- */
 
 const Span = require('./models/Span');
-
-/**
- * Calculate the mean (average) of an array of values
+/*
  * @param {number[]} values - Array of numeric values
  * @returns {number} The mean value
  */

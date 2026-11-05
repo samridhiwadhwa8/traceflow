@@ -55,20 +55,27 @@ app.get('/api/slow', async (req, res) => {
 app.post('/checkout', async (req, res) => {
   try {
     // Checkout process with multiple operations
+    const fault = String(req.query.fault || 'none');
     await withSpan('validate_request', async () => {
       await new Promise(resolve => setTimeout(resolve, 100));
     });
 
     await withSpan('process_payment', async () => {
-      await new Promise(resolve => setTimeout(resolve, 800));
+      await new Promise(resolve => setTimeout(resolve, fault === 'slow_payment' ? 1500 : 800));
+      if (fault === 'payment_500') {
+        throw new Error('Injected payment failure');
+      }
     });
 
     await withSpan('update_inventory', async () => {
-      await new Promise(resolve => setTimeout(resolve, 400));
+      await new Promise(resolve => setTimeout(resolve, fault === 'slow_inventory' ? 1100 : 400));
+      if (fault === 'inventory_500') {
+        throw new Error('Injected inventory failure');
+      }
     });
 
     await withSpan('send_confirmation', async () => {
-      await new Promise(resolve => setTimeout(resolve, 200));
+      await new Promise(resolve => setTimeout(resolve, fault === 'slow_confirmation' ? 900 : 200));
     });
 
     res.json({ message: 'Checkout successful' });
