@@ -21,7 +21,6 @@ const spans = [
 ];
 
 console.log("Testing TraceFlow Statistics Module");
-console.log("====================================");
 console.log("Sample span data:", spans);
 
 // Group spans by operation

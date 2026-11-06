@@ -148,6 +148,7 @@ app.get('/api/v1/traces/:traceId/diagnosis', async (req, res) => {
     const baselineTraces = await Trace.find({
       traceId: { $ne: traceId },
       status: { $lt: 500 },
+      faultType: { $in: ["normal", null] },
       route: routePattern
     })
       .sort({ timestamp: -1 })
