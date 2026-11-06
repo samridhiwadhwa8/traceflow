@@ -17,6 +17,10 @@ const traceSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  faultType: {
+    type: String,
+    default: "normal"
+  },
   status: {
     type: Number,
     required: true
