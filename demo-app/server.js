@@ -61,21 +61,21 @@ app.post('/checkout', async (req, res) => {
     });
 
     await withSpan('process_payment', async () => {
-      await new Promise(resolve => setTimeout(resolve, fault === 'slow_payment' ? 1500 : 800));
+      await new Promise(resolve => setTimeout(resolve, fault === 'slow_payment' ? 3000 : 800));
       if (fault === 'payment_500') {
         throw new Error('Injected payment failure');
       }
     });
 
     await withSpan('update_inventory', async () => {
-      await new Promise(resolve => setTimeout(resolve, fault === 'slow_inventory' ? 1100 : 400));
+      await new Promise(resolve => setTimeout(resolve, fault === 'slow_inventory' ? 2500 : 400));
       if (fault === 'inventory_500') {
         throw new Error('Injected inventory failure');
       }
     });
 
     await withSpan('send_confirmation', async () => {
-      await new Promise(resolve => setTimeout(resolve, fault === 'slow_confirmation' ? 900 : 200));
+      await new Promise(resolve => setTimeout(resolve, fault === 'slow_confirmation' ? 3000 : 200));
     });
 
     res.json({ message: 'Checkout successful' });
