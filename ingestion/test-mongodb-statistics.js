@@ -1,44 +1,55 @@
-require("dotenv").config();
-const mongoose = require("mongoose");
-const Span = require("./models/Span");
-const { getSpanStatistics } = require("./statistics");
+require('dotenv').config();
+const mongoose = require('mongoose');
+const Span = require('./models/Span');
+const { getSpanStatistics } = require('./statistics');
 
-// Use an environment variable for hosted databases; otherwise use local MongoDB.
-// Never commit database credentials to source code.
-const MONGODB_URI =
-  process.env.MONGODB_URI || "mongodb://127.0.0.1:27017/traceflow";
+// MongoDB connection
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/traceflow';
 
 async function testMongoDBStatistics() {
-  try {
-    await mongoose.connect(MONGODB_URI);
-    console.log("Connected to MongoDB");
+    try {
+        // Connect to MongoDB
+        await mongoose.connect(MONGODB_URI);
+        console.log('Connected to MongoDB');
 
-    const endTime = new Date();
-    const startTime = new Date(endTime.getTime() - 24 * 60 * 60 * 1000);
+        // Get statistics for the last 24 hours (wider range to find data)
+        const endTime = new Date();
+        const startTime = new Date(endTime.getTime() - 24 * 60 * 60 * 1000); // 24 hours ago
 
-    const totalSpans = await Span.countDocuments();
-    const spansInRange = await Span.countDocuments({
-      startTime: { $gte: startTime, $lte: endTime },
-    });
+        console.log(`Calculating statistics for spans from ${startTime} to ${endTime}`);
 
-    console.log(`Total spans in database: ${totalSpans}`);
-    console.log(`Spans in the last 24 hours: ${spansInRange}`);
+        // Check total span count
+        const totalSpans = await Span.countDocuments();
+        console.log(`Total spans in database: ${totalSpans}`);
 
-    const queryPlan = await Span.find({
-      startTime: { $gte: startTime, $lte: endTime },
-    }).explain("executionStats");
-    console.log("MongoDB query execution stats:");
-    console.log(JSON.stringify(queryPlan, null, 2));
+        // Check spans in time range
+        const spansInRange = await Span.countDocuments({
+            startTime: {
+                $gte: startTime,
+                $lte: endTime
+            }
+        });
+        console.log(`Spans in time range: ${spansInRange}`);
+         const result = await Span.find({
+            startTime: {
+                      $gte: startTime,
+                        $lte: endTime
+            }
+        }).explain("executionStats");
+        console.log('\nMongoDB Query Plan:');
+        console.log(JSON.stringify(result, null, 2));
 
-    const statistics = await getSpanStatistics(startTime, endTime);
-    console.log("Statistics by operation:");
-    console.log(JSON.stringify(statistics, null, 2));
-  } catch (error) {
-    console.error("MongoDB statistics check failed:", error.message);
-    process.exitCode = 1;
-  } finally {
-    await mongoose.disconnect();
-  }
+        const statistics = await getSpanStatistics(startTime, endTime);
+
+        console.log('\nStatistics by operation:');
+        console.log(JSON.stringify(statistics, null, 2));
+
+    } catch (error) {
+        console.error('Error:', error);
+    } finally {
+        await mongoose.disconnect();
+        console.log('\nDisconnected from MongoDB');
+    }
 }
 
 testMongoDBStatistics();
