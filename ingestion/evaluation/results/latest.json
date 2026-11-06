@@ -1,0 +1,634 @@
+{
+  "generatedAt": "2026-11-06T09:52:15.957Z",
+  "warmupTraces": 5,
+  "detection": {
+    "tp": 50,
+    "tn": 10,
+    "fp": 0,
+    "fn": 0,
+    "accuracy": 1,
+    "precision": 1,
+    "recall": 1,
+    "f1": 1,
+    "falsePositiveRate": 0
+  },
+  "rootCause": {
+    "evaluated": 50,
+    "top1Accuracy": 1,
+    "top3Accuracy": 1,
+    "endToEndTop1Accuracy": 1
+  },
+  "rows": [
+    {
+      "testId": "normal_001",
+      "expectedAnomaly": false,
+      "expectedRootCause": null,
+      "actualAnomaly": false,
+      "state": "normal",
+      "ranking": []
+    },
+    {
+      "testId": "normal_002",
+      "expectedAnomaly": false,
+      "expectedRootCause": null,
+      "actualAnomaly": false,
+      "state": "normal",
+      "ranking": []
+    },
+    {
+      "testId": "normal_003",
+      "expectedAnomaly": false,
+      "expectedRootCause": null,
+      "actualAnomaly": false,
+      "state": "normal",
+      "ranking": []
+    },
+    {
+      "testId": "normal_004",
+      "expectedAnomaly": false,
+      "expectedRootCause": null,
+      "actualAnomaly": false,
+      "state": "normal",
+      "ranking": []
+    },
+    {
+      "testId": "normal_005",
+      "expectedAnomaly": false,
+      "expectedRootCause": null,
+      "actualAnomaly": false,
+      "state": "normal",
+      "ranking": []
+    },
+    {
+      "testId": "normal_006",
+      "expectedAnomaly": false,
+      "expectedRootCause": null,
+      "actualAnomaly": false,
+      "state": "normal",
+      "ranking": []
+    },
+    {
+      "testId": "normal_007",
+      "expectedAnomaly": false,
+      "expectedRootCause": null,
+      "actualAnomaly": false,
+      "state": "normal",
+      "ranking": []
+    },
+    {
+      "testId": "normal_008",
+      "expectedAnomaly": false,
+      "expectedRootCause": null,
+      "actualAnomaly": false,
+      "state": "normal",
+      "ranking": []
+    },
+    {
+      "testId": "normal_009",
+      "expectedAnomaly": false,
+      "expectedRootCause": null,
+      "actualAnomaly": false,
+      "state": "normal",
+      "ranking": []
+    },
+    {
+      "testId": "normal_010",
+      "expectedAnomaly": false,
+      "expectedRootCause": null,
+      "actualAnomaly": false,
+      "state": "normal",
+      "ranking": []
+    },
+    {
+      "testId": "slow_payment_001",
+      "expectedAnomaly": true,
+      "expectedRootCause": "process_payment",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "process_payment"
+      ]
+    },
+    {
+      "testId": "slow_payment_002",
+      "expectedAnomaly": true,
+      "expectedRootCause": "process_payment",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "process_payment"
+      ]
+    },
+    {
+      "testId": "slow_payment_003",
+      "expectedAnomaly": true,
+      "expectedRootCause": "process_payment",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "process_payment",
+        "validate_request"
+      ]
+    },
+    {
+      "testId": "slow_payment_004",
+      "expectedAnomaly": true,
+      "expectedRootCause": "process_payment",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "process_payment",
+        "send_confirmation",
+        "update_inventory"
+      ]
+    },
+    {
+      "testId": "slow_payment_005",
+      "expectedAnomaly": true,
+      "expectedRootCause": "process_payment",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "process_payment",
+        "update_inventory"
+      ]
+    },
+    {
+      "testId": "slow_payment_006",
+      "expectedAnomaly": true,
+      "expectedRootCause": "process_payment",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "process_payment",
+        "update_inventory"
+      ]
+    },
+    {
+      "testId": "slow_payment_007",
+      "expectedAnomaly": true,
+      "expectedRootCause": "process_payment",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "process_payment",
+        "send_confirmation"
+      ]
+    },
+    {
+      "testId": "slow_payment_008",
+      "expectedAnomaly": true,
+      "expectedRootCause": "process_payment",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "process_payment"
+      ]
+    },
+    {
+      "testId": "slow_payment_009",
+      "expectedAnomaly": true,
+      "expectedRootCause": "process_payment",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "process_payment",
+        "validate_request"
+      ]
+    },
+    {
+      "testId": "slow_payment_010",
+      "expectedAnomaly": true,
+      "expectedRootCause": "process_payment",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "process_payment",
+        "update_inventory"
+      ]
+    },
+    {
+      "testId": "slow_inventory_001",
+      "expectedAnomaly": true,
+      "expectedRootCause": "update_inventory",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "update_inventory"
+      ]
+    },
+    {
+      "testId": "slow_inventory_002",
+      "expectedAnomaly": true,
+      "expectedRootCause": "update_inventory",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "update_inventory",
+        "send_confirmation"
+      ]
+    },
+    {
+      "testId": "slow_inventory_003",
+      "expectedAnomaly": true,
+      "expectedRootCause": "update_inventory",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "update_inventory"
+      ]
+    },
+    {
+      "testId": "slow_inventory_004",
+      "expectedAnomaly": true,
+      "expectedRootCause": "update_inventory",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "update_inventory"
+      ]
+    },
+    {
+      "testId": "slow_inventory_005",
+      "expectedAnomaly": true,
+      "expectedRootCause": "update_inventory",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "update_inventory",
+        "validate_request"
+      ]
+    },
+    {
+      "testId": "slow_inventory_006",
+      "expectedAnomaly": true,
+      "expectedRootCause": "update_inventory",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "update_inventory",
+        "validate_request",
+        "send_confirmation"
+      ]
+    },
+    {
+      "testId": "slow_inventory_007",
+      "expectedAnomaly": true,
+      "expectedRootCause": "update_inventory",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "update_inventory"
+      ]
+    },
+    {
+      "testId": "slow_inventory_008",
+      "expectedAnomaly": true,
+      "expectedRootCause": "update_inventory",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "update_inventory",
+        "validate_request"
+      ]
+    },
+    {
+      "testId": "slow_inventory_009",
+      "expectedAnomaly": true,
+      "expectedRootCause": "update_inventory",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "update_inventory"
+      ]
+    },
+    {
+      "testId": "slow_inventory_010",
+      "expectedAnomaly": true,
+      "expectedRootCause": "update_inventory",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "update_inventory",
+        "process_payment",
+        "validate_request",
+        "send_confirmation"
+      ]
+    },
+    {
+      "testId": "slow_confirmation_001",
+      "expectedAnomaly": true,
+      "expectedRootCause": "send_confirmation",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "send_confirmation",
+        "process_payment",
+        "validate_request"
+      ]
+    },
+    {
+      "testId": "slow_confirmation_002",
+      "expectedAnomaly": true,
+      "expectedRootCause": "send_confirmation",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "send_confirmation",
+        "validate_request",
+        "process_payment",
+        "update_inventory"
+      ]
+    },
+    {
+      "testId": "slow_confirmation_003",
+      "expectedAnomaly": true,
+      "expectedRootCause": "send_confirmation",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "send_confirmation",
+        "process_payment",
+        "update_inventory",
+        "validate_request"
+      ]
+    },
+    {
+      "testId": "slow_confirmation_004",
+      "expectedAnomaly": true,
+      "expectedRootCause": "send_confirmation",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "send_confirmation"
+      ]
+    },
+    {
+      "testId": "slow_confirmation_005",
+      "expectedAnomaly": true,
+      "expectedRootCause": "send_confirmation",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "send_confirmation",
+        "process_payment",
+        "update_inventory"
+      ]
+    },
+    {
+      "testId": "slow_confirmation_006",
+      "expectedAnomaly": true,
+      "expectedRootCause": "send_confirmation",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "send_confirmation",
+        "update_inventory"
+      ]
+    },
+    {
+      "testId": "slow_confirmation_007",
+      "expectedAnomaly": true,
+      "expectedRootCause": "send_confirmation",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "send_confirmation",
+        "update_inventory"
+      ]
+    },
+    {
+      "testId": "slow_confirmation_008",
+      "expectedAnomaly": true,
+      "expectedRootCause": "send_confirmation",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "send_confirmation",
+        "process_payment",
+        "validate_request"
+      ]
+    },
+    {
+      "testId": "slow_confirmation_009",
+      "expectedAnomaly": true,
+      "expectedRootCause": "send_confirmation",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "send_confirmation",
+        "update_inventory"
+      ]
+    },
+    {
+      "testId": "slow_confirmation_010",
+      "expectedAnomaly": true,
+      "expectedRootCause": "send_confirmation",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "send_confirmation"
+      ]
+    },
+    {
+      "testId": "payment_500_001",
+      "expectedAnomaly": true,
+      "expectedRootCause": "process_payment",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "process_payment"
+      ]
+    },
+    {
+      "testId": "payment_500_002",
+      "expectedAnomaly": true,
+      "expectedRootCause": "process_payment",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "process_payment"
+      ]
+    },
+    {
+      "testId": "payment_500_003",
+      "expectedAnomaly": true,
+      "expectedRootCause": "process_payment",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "process_payment"
+      ]
+    },
+    {
+      "testId": "payment_500_004",
+      "expectedAnomaly": true,
+      "expectedRootCause": "process_payment",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "process_payment"
+      ]
+    },
+    {
+      "testId": "payment_500_005",
+      "expectedAnomaly": true,
+      "expectedRootCause": "process_payment",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "process_payment"
+      ]
+    },
+    {
+      "testId": "payment_500_006",
+      "expectedAnomaly": true,
+      "expectedRootCause": "process_payment",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "process_payment"
+      ]
+    },
+    {
+      "testId": "payment_500_007",
+      "expectedAnomaly": true,
+      "expectedRootCause": "process_payment",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "process_payment"
+      ]
+    },
+    {
+      "testId": "payment_500_008",
+      "expectedAnomaly": true,
+      "expectedRootCause": "process_payment",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "process_payment"
+      ]
+    },
+    {
+      "testId": "payment_500_009",
+      "expectedAnomaly": true,
+      "expectedRootCause": "process_payment",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "process_payment"
+      ]
+    },
+    {
+      "testId": "payment_500_010",
+      "expectedAnomaly": true,
+      "expectedRootCause": "process_payment",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "process_payment"
+      ]
+    },
+    {
+      "testId": "inventory_500_001",
+      "expectedAnomaly": true,
+      "expectedRootCause": "update_inventory",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "update_inventory"
+      ]
+    },
+    {
+      "testId": "inventory_500_002",
+      "expectedAnomaly": true,
+      "expectedRootCause": "update_inventory",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "update_inventory"
+      ]
+    },
+    {
+      "testId": "inventory_500_003",
+      "expectedAnomaly": true,
+      "expectedRootCause": "update_inventory",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "update_inventory"
+      ]
+    },
+    {
+      "testId": "inventory_500_004",
+      "expectedAnomaly": true,
+      "expectedRootCause": "update_inventory",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "update_inventory"
+      ]
+    },
+    {
+      "testId": "inventory_500_005",
+      "expectedAnomaly": true,
+      "expectedRootCause": "update_inventory",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "update_inventory"
+      ]
+    },
+    {
+      "testId": "inventory_500_006",
+      "expectedAnomaly": true,
+      "expectedRootCause": "update_inventory",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "update_inventory"
+      ]
+    },
+    {
+      "testId": "inventory_500_007",
+      "expectedAnomaly": true,
+      "expectedRootCause": "update_inventory",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "update_inventory"
+      ]
+    },
+    {
+      "testId": "inventory_500_008",
+      "expectedAnomaly": true,
+      "expectedRootCause": "update_inventory",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "update_inventory"
+      ]
+    },
+    {
+      "testId": "inventory_500_009",
+      "expectedAnomaly": true,
+      "expectedRootCause": "update_inventory",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "update_inventory"
+      ]
+    },
+    {
+      "testId": "inventory_500_010",
+      "expectedAnomaly": true,
+      "expectedRootCause": "update_inventory",
+      "actualAnomaly": true,
+      "state": "anomaly",
+      "ranking": [
+        "update_inventory"
+      ]
+    }
+  ]
+}
